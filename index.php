@@ -139,3 +139,155 @@ $dompdf->render();
 $dompdf->stream("laporan_transaksi.pdf", ["Attachment" => 0]);
 ?>
 
+
+
+
+
+
+<!-- Misal -->
+
+<?php
+ require 'koneksi.php';
+ session_start();
+
+ 
+ if (isset($_GET['pesan'])) {
+     $success = $_GET['pesan'];
+     $url = strtok("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]", '?');
+ }
+ 
+ 
+
+if (isset($_SESSION['peran'])) {
+       if ($_SESSION['peran'] == 'admin' || $_SESSION['peran'] == 'pelanggan') {
+                header('location:'.$_SESSION['peran'].'.php');
+                exit;
+       }else {
+                header('location: logout.php');
+                exit;
+       }
+}
+
+
+
+
+
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        
+        $nama_pengguna = $_POST['nama_pengguna'];
+        $kata_sandi = $_POST['kata_sandi'];
+
+        $stmt = $pdo->prepare('SELECT * FROM pengguna where nama_pengguna = :nama_pengguna');
+        $stmt->bindParam(':nama_pengguna', $nama_pengguna);
+        $stmt->execute();
+
+        $pengguna = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($pengguna) {
+                if (password_verify($kata_sandi,$pengguna['kata_sandi'])) {
+                        $_SESSION['id_pengguna'] = $pengguna['id'];
+                        $_SESSION['peran'] = $pengguna['peran'];
+
+                        if ($_SESSION['peran'] == 'admin' || $_SESSION['peran'] == 'pelanggan') {
+                                header('location:'.$_SESSION['peran'].'.php');
+                                exit;
+                       }else {
+                               $error = 'Kesalahan Sistem,Peran tidak ditemukan';
+                       }
+
+                        $success = "Kata sandi benar";
+                }else {
+                        $error = "Kata sandi salah";
+                }
+
+        }else {
+                $error = "Pengguna Tidak Ditemukan !";   
+        }
+
+}
+
+
+?>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="js/bootstrap.min.js">
+    <?php if (isset($url)): ?>
+        <script>
+                history.replaceState(null, null, "<?= $url ?>");
+        </script>
+<?php endif; ?>
+</head>
+<body>
+
+
+<div class="container" style="margin-top: 300px;">
+        <div class="row justify-content-center mt-5">
+                <div class="col-md-6">
+                        <div class="card border-0 shadow-lg rounded">
+                                <div class="card-header bg-white border-0 p-4">
+                                        <h4 class="text-center">Login Aplikasi</h4>
+                                </div>
+
+
+                                <div class="card-body">
+                                        <?php if (isset($error)) : ?>
+                                                <div class="alert alert-danger" role="alert">
+                                                        <?= $error ?? ''; ?>
+                                                </div>
+
+                                        <?php endif; ?>
+
+                                        <?php if (isset($success)) : ?>
+                                                <div class="alert alert-success" role="alert">
+                                                        <?= $success ?? ''; ?>
+                                                </div>
+                                        <?php endif; ?>
+
+                                                    
+
+                                        <form action="" method="post">
+                                                
+                                        <div class="mb-3">
+                                                <label for="nama_pengguna" class="label-form">Nama Pengguna</label>
+                                                <input type="text" name="nama_pengguna" id="nama_pengguna" class="form-control" placeholder="Masukan Nama Pengguna">
+                                        </div>
+
+                                        <div class="mb-3">
+                                                <label for="nama_pengguna" class="label-form">Kata Sandi</label>
+                                                <input type="password" name="kata_sandi" id="kata_sandi" class="form-control" placeholder="Masukan Kata Sandi Anda">
+                                        </div>
+                                        <div class="mt-3 d-flex justify-content-end">
+                                                <a href="register.php" class="nav-link mt-2">Daftar akun?</a>
+                                                <button class="btn btn-primary ms-3" type="submit">Masuk</button>
+                                                </div>
+
+
+
+                                        </form>
+                                </div>
+        
+
+
+
+
+                        </div>
+                </div>
+        </div>
+</div>
+
+
+        
+
+
+</body>
+</html>
+
+
