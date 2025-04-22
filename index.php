@@ -1,7 +1,25 @@
 <?php 
 require_once 'koneksi.php';
 
+"PHP TAG": {
+	"prefix": "php",
+	"body": [
+		"<?php $1",
+		"$0",
+		"?>"
+	]
+	},
 
+	
+	"inline echo": {
+	"prefix": "phpp",
+	"body": "<?= $$1; ?>"
+	},
+
+	"php-n": {
+	"prefix": "ph",
+	"body": "<?php "
+	},
 ?>
 
 
